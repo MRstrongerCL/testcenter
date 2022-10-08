@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load my_tags %}
+{% load static %}
+        {% block bodyleft %}
+        <div class="layui-side layui-bg-black">
+            <div class="layui-side-scroll">
+            <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+              <ul class="layui-nav layui-nav-tree layui-bg-cyan layui-inline"  lay-filter="test">
+                <li class="layui-nav-item {{view_v2}}">
+                  <a class="" href="javascript:;">质量统计</a>
+                  <dl class="layui-nav-child">
+                      {% if perms.Bug.add_detail %}
+                          <dd><a href="/mangesetting/"  style="{{mange_v2_style}}">管理设置</a></dd>
+                      {% endif %}
+                      {% if perms.Bug.view_detail %}
+                          <dd><a href="/buglist/" style="{{bug_v2_style}}">缺陷列表</a></dd>
+                      {% endif %}
+                      {% if perms.Bug.view_program %}
+                          <dd><a href="/total/" style="{{total_v2_style}}">总体缺陷情况</a></dd>
+                      {% endif %}
+                      {% if perms.Bug.view_detail %}
+                          <dd><a href="/recently/" style="{{recently_v2_style}}">近期缺陷趋势</a></dd>
+                      {% endif %}
+                      {% if perms.Bug.view_iteration %}
+                          <dd><a href="/iteration/" style="{{iteration_v2_style}}">历史迭代缺陷</a></dd>
+                      {% endif %}
+                      {% if perms.Bug.view_moudle %}
+                          <dd><a href="/bugModule/" style="{{bugModule_v2_style}}">缺陷模块统计</a></dd>
+                      {% endif %}
+                      {% if perms.Bug.view_type %}
+                          <dd><a href="/bugType/" style="{{bugType_v2_style}}">缺陷类型统计</a></dd>
+                      {% endif %}
+                      {% if perms.Bug.view_developdetail %}
+                          <dd><a href="/developQuality/" style="{{developQuality_v2_style}}">研发质量统计</a></dd>
+                      {% endif %}
+                      {% if perms.Bug.view_testdetail %}
+                          <dd><a href="/testerQuality/" style="{{testerQuality_v2_style}}">测试质量统计</a></dd>
+                      {% endif %}
+                  </dl>
+                </li>
+                <li class="layui-nav-item {{view_kp}}">
+                  <a href="javascript:;">考评管理</a>
+                  <dl class="layui-nav-child">
+                      {% if perms.Bug.add_rate %}
+                        <dd><a href="/score_rate_setting/" style="{{score_setting_style}}">评分系数设置</a></dd>
+                      {% endif %}
+                      {% if perms.Bug.add_rate %}
+                        <dd><a href="/task_score/" style="{{task_score_style}}">需求任务评分</a></dd>
+                      {% endif %}
+                      {% if perms.Bug.delete_testdetail or perms.Bug.delete_developdetail %}
+                      <dd><a href="/leader_score/" style="{{leader_score_style}}">基础分评估</a></dd>
+                      {% endif %}
+                      <dd><a href="/score_statistics/" style="{{score_statistics_style}}">评分统计</a></dd>
+                  </dl>
+                </li>
+                <li class="layui-nav-item {{view_xl}}"><a href="/efficiency/">效率统计</a></li>
+                <li class="layui-nav-item {{view_auto}}"><a href="/autotask/">自动化任务</a></li>
+              </ul>
+            </div>
+        </div>
+        {% endblock %}

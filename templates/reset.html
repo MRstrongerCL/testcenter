@@ -1,0 +1,137 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>好生活测试平台</title>
+    <link rel="shortcut icon" href="/static/images/hsh_favicon.ico" type="image/x-icon">
+    <script src="/static/js/jquery-3.4.1/jquery-3.4.1.min.js"></script>
+    <link rel="stylesheet" href="/static/css/layui.css">
+    <link rel="stylesheet" href="/static/css/adminLogin.css">
+</head>
+<body>
+    <div class="wrap">
+        <img src="/static/images/8.jfif" class="imgStyle">
+        <div class="loginForm">
+            <form>
+                <div class="logoHead">
+                    <h2 align="center" style="margin-top: 15px">密码重置</h2>
+                </div>
+                <div class="usernameWrapDiv">
+                    <div class="usernameLabel">
+                        <label>用户名:</label>
+                    </div>
+                    <div class="usernameDiv">
+                        <i class="layui-icon layui-icon-username adminIcon"></i>
+                        <input id="loginUsername" class="layui-input adminInput" type="text" name="username" placeholder="输入用户名" >
+                    </div>
+                </div>
+                <div class="usernameWrapDiv">
+                    <div class="usernameLabel">
+                        <label>新密码:</label>
+                    </div>
+                    <div class="passwordDiv">
+                        <i class="layui-icon layui-icon-password adminIcon"></i>
+                        <input id="loginPassword" class="layui-input adminInput" type="password" name="password" placeholder="输入密码">
+                    </div>
+                </div>
+                <div class="usernameWrapDiv">
+                    <div class="usernameLabel" style="width: 80px; margin-left: 50px">
+                        <label>重复密码:</label>
+                    </div>
+                    <div class="passwordDiv">
+                        <i class="layui-icon layui-icon-password adminIcon"></i>
+                        <input id="loginPassword2" class="layui-input adminInput" type="password" name="password" placeholder="输入密码">
+                    </div>
+                </div>
+                <div class="usernameWrapDiv">
+                    <div class="submitDiv" style="margin-left: 220px; ">
+                        <input id="loginBtn" type="button" class="submit layui-btn layui-btn-primary" value="重 置" style="font-size: 16px;background-color: #2D93CA; color: white"></input>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="/static/layui.js" type="text/javascript"></script>
+    <script>
+        layui.use(['layer'],function () {
+            var layer = layui.layer;
+        })
+        $(function () {
+            // 登陆事件
+            $('#loginBtn').click(function () {
+                reset();
+            });
+        });
+        // 校验验证码、用户名、密码
+        function validateCode(inputID) {
+            var loginUsername = $('#loginUsername').val();
+            var loginPassword = $('#loginPassword').val();
+            var loginPassword2 = $('#loginPassword2').val();
+            if ($.trim(loginUsername) == '' || $.trim(loginUsername).length<=0){
+                layer.alert("用户名不能为空");
+                return false;
+            }
+            if ($.trim(loginPassword) == '' || $.trim(loginPassword).length<=0){
+                layer.alert("密码不能为空");
+                return false;
+            }
+            if (loginPassword2 != loginPassword){
+                layer.alert("两次密码不一致！");
+                return false;
+            }
+            return true;
+        }
+        // 获取cookie
+        function getCookie(name){
+            var arr,reg=new RegExp("(^| )"+name+"=([^;]*)(;|$)");
+            if(arr=document.cookie.match(reg))
+                return unescape(arr[2]);
+            else
+                return null;
+        }
+        // 重置流程
+        function reset() {
+            if (!validateCode('#loginCard')){
+                //阻断提示
+            }else {
+                var loginUsername = $('#loginUsername').val();
+                var loginPassword = $('#loginPassword').val();
+                var loginPassword2 = $('#loginPassword2').val();
+                var loginLoadIndex = layer.load(2);
+                $('#loginBtn').val("正在重置...");
+                $.ajax({
+                    type:'POST',
+                    url:'/reset/',
+                    dataType:'html',
+                    data: {
+                        csrfmiddlewaretoken: '{{ csrf_token  }}',
+                        Username: loginUsername,
+                        Password: loginPassword,
+                        PasswordCopy: loginPassword2
+                    },
+                    success:function (data) {
+                        layer.close(loginLoadIndex);
+                        $('#loginBtn').val("重 置");
+                        var jsonData = JSON.parse(data);
+                        if ( jsonData.code == 0 ){
+                            layer.alert(jsonData.msg);
+                            window.location.href = '../login';
+                        } else {
+                            layer.alert(jsonData.msg);
+                        }
+                    },
+                    error:function () {
+                        layer.close(loginLoadIndex);
+                        layer.alert("重置失败！");
+                        $('#loginBtn').val("重 置");
+                    }
+                });
+            }
+
+        }
+    </script>
+    {% csrf_token %}
+</body>
+
+</html>

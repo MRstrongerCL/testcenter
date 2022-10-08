@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load my_tags %}
+{% load static %}
+
+{% block mainbody %}
+    <p>继承了 base.html 文件</p>
+    <P>{{views}}</P>
+    <p>{{views.1}}</p>
+    <h3>{{time|date:"Y-m-d"}}</h3>
+    <p>{{chars|truncatechars:10}}</p>
+    <p>{{views_str|safe}}</p>
+    <p>{{11|my_filter:22}}</p>
+    <p>{% my_tag1 11 22 33 %}</p>
+    <p>{% my_html "eee" "xxx" %}</p>
+    <img src='{% static "images/dgd.jpg" %}' alt="Yeah">
+{% endblock %}

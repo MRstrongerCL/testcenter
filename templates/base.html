@@ -1,0 +1,71 @@
+<!DOCTYPE HTML>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>质量管理平台</title>
+    <link rel="shortcut icon" href="/static/images/hsh_favicon.ico" type="image/x-icon">
+    <!--<link rel="stylesheet" href="/static/plugins/bootstrap-4.0.0-dist/css/bootstrap.css">-->
+    {% block style %}
+    {% endblock %}
+    <script src="/static/layui.js"></script>
+</head>
+{% block scripts1 %}
+{% endblock %}
+<body class="layui-layout-body">
+    {% block body1 %}
+    {% endblock %}
+    <div class="layui-layout layui-layout-admin">
+        <div class="layui-header">
+            <div class="layui-logo" style="font-weight:bold">TestCenter </div>
+            <!-- 头部区域（可配合layui已有的水平导航） -->
+            <ul class="layui-nav layui-layout-left">
+              <li class="layui-nav-item"><a href="/" style="{{quality_style}}">质量管理</a></li>
+              <li class="layui-nav-item"><a href="/testtools/" style="{{tools_style}}">测试工具</a></li>
+              <li class="layui-nav-item"><a href="/usermanage/" style="{{users_style}}">用户管理</a></li>
+              <li class="layui-nav-item">
+                <a href="javascript:;">其它系统</a>
+                <dl class="layui-nav-child">
+                  <dd><a href="http://192.168.2.16:8080/" target="_blank">测试jenkins</a></dd>
+                  <dd><a href="https://dev-test-jenkins.ihaoshenghuo.com/" target="_blank">运维jenkins</a></dd>
+                  <dd><a href="https://grafana.ihaoshenghuo.com/" target="_blank">grafana日志</a></dd>
+                  <dd><a href="https://confluence.ihaoshenghuo.com/" target="_blank">Confluence</a></dd>
+                  <dd><a href="https://jira.ihaoshenghuo.com/" target="_blank">Jira</a></dd>
+                  <dd><a href="https://zentao.ihaoshenghuo.com/" target="_blank">禅道</a></dd>
+                  <dd><a href="https://yapi.ihaoshenghuo.com/" target="_blank">Yapi</a></dd>
+                  <dd><a href="https://ldap-ssp.ihaoshenghuo.com/" target="_blank">Ldap密码修改</a></dd>
+                </dl>
+              </li>
+            </ul>
+            <ul class="layui-nav layui-layout-right">
+              <li class="layui-nav-item">
+                <a href="javascript:;">
+                  <img src="/static/images/头像.jfif" class="layui-nav-img">
+                  {{ request.user.username }}
+                </a>
+                <dl class="layui-nav-child">
+                  <dd><a href="/reset/">密码重置</a></dd>
+                </dl>
+              </li>
+              <li class="layui-nav-item"><a href="/logout/">退出</a></li>
+            </ul>
+        </div>
+        {% block bodyleft %}
+        {% endblock %}
+        {% block mainbody %}
+        {% endblock %}
+    </div>
+    {% block scripts2 %}
+    {% endblock %}
+    <script>
+        layui.use(['form', 'layedit', 'layer','element','upload'], function(){
+            var element = layui.element;
+    	    var upload = layui.upload;
+            var form = layui.form;
+            var layedit = layui.layedit;
+            var layer = layui.layer;
+        });
+    </script>
+
+</body>
+</html>

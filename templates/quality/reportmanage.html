@@ -1,0 +1,1617 @@
+{% extends "qualityBase.html" %}
+{% load my_tags %}
+{% load static %}
+{% block style %}
+<meta name="renderer" content="webkit">
+<link rel="stylesheet" href="/static/css/layui.css" media="all">
+<link rel="stylesheet" href="/static/css/Loading.css" media="screen" title="no title" charset="utf-8">
+{% endblock %}
+{% block scripts1 %}
+<script src="/static/layui.js"></script>
+<script src="/static/js/Loading.js" charset="utf-8"></script>
+{% endblock %}
+{% block mainbody %}
+<div class="layui-body layui-tab site-demo site-demo-body" lay-filter="tc_demo" style="margin-left: 10px;">
+    <ul class="layui-tab-title site-demo-title" id="setting">
+        {% if perms.Bug.add_detail %}
+            <li class="{{import_v2_title_class}}" style="{{import_v2_title_style}}">接口导入bug</li>
+        {% endif %}
+        {% if perms.Bug.add_detail %}
+            <li>导入bug文件</li>
+        {% endif %}
+        {% if perms.Bug.add_detail %}
+            <li>导入用例执行情况</li>
+        {% endif %}
+        {% if perms.Bug.change_testdetail and perms.Bug.view_testdetail %}
+            <li>测试人员数据录入</li>
+        {% endif %}
+        {% if perms.Bug.change_developdetail and perms.Bug.view_developdetail %}
+            <li class="{{import_v2_title_class2}}" style="{{import_v2_title_style2}}">开发人员数据录入</li>
+        {% endif %}
+{#        {% if perms.Bug.add_testdetail and perms.Bug.add_developdetail and perms.Bug.delete_testdetail and perms.Bug.delete_developdetail %}#}
+{#            <li class="{{import_v2_title_class3}}" style="{{import_v2_title_style3}}">项目主管评分</li>#}
+{#        {% endif %}#}
+{#        {% if perms.Bug.change_testdetail and perms.Bug.delete_testdetail or perms.Bug.change_developdetail and perms.Bug.delete_developdetail %}#}
+{#            <li>技术主管评分</li>#}
+{#        {% endif %}#}
+    </ul>
+    <div class="layui-tab-content">
+        {% if perms.Bug.add_detail %}
+        <div class="layui-tab-item {{import_v2_title_show}}">
+                <div class="layui-main">
+                    <div id="LAY_preview">
+                        <form class="layui-form" action="" style="margin-top: 20px;">
+                            <div class="layui-form-item">
+                                <div class="layui-inline">
+                                    <label class="layui-form-label">数据来源</label>
+                                    <div class="layui-input-inline">
+                                        <select  id="source_select" lay-verify="required" lay-search="">
+                                            <option value="">选择数据来源</option>
+                                            <option value="zentao">禅道</option>
+                                            <option value="jira">Jira</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <div class="layui-inline">
+                                    <label class="layui-form-label">归属项目</label>
+                                    <div class="layui-input-inline">
+                                        <select class="layui-select" id="program_select2" name="quiz2" lay-filter="chufaversion2" >
+                                            <option value="">请选择项目</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <div class="layui-inline">
+                                    <label class="layui-form-label">迭代版本</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" name="iteration" id="iteration2" lay-verify="required" lay-reqtext="迭代版本号必填项，岂能为空？" autocomplete="off" placeholder="请输入"  class="layui-input" style="width:400px">
+                                    </div>
+                                </div>
+                                <div class="layui-inline">
+                                    <select class="layui-select" id="version_select2" lay-filter="existitera2" style="color: darkcyan;margin-left: 10px">
+                                        <option value="">已存在的版本</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="layui-form-item">
+                                <div class="layui-inline">
+                                    <label class="layui-form-label">迭代日期</label>
+                                    <div class="layui-input-inline">
+                                        <input type="date" id="date_s2" placeholder="开始日期" class="layui-input">
+                                    </div>
+                                <div class="layui-form-mid">--</div>
+                                <div class="layui-input-inline">
+                                    <input type="date" id="date_e2"  placeholder="结束日期" class="layui-input">
+                                </div>
+                                </div>
+                            </div>
+                            <div class="layui-form-item layui-form-text">
+                                <label class="layui-form-label">设置备注</label>
+                                <div class="layui-input-block">
+                                    <textarea placeholder="请输入内容" class="layui-textarea" style="width: 600px"></textarea>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <div class="layui-input-block">
+                                    <button type="button" class="layui-btn" id="uploadapi" onclick="apiImport();"><i class="layui-icon"></i>导入</button>
+                                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+        </div>
+        {% endif %}
+        {% if perms.Bug.add_detail %}
+        <div class="layui-tab-item">
+                <div class="layui-main">
+                    <div id="LAY_preview">
+                        <form class="layui-form" action="" style="margin-top: 20px;">
+                            <div class="layui-form-item">
+                                <div class="layui-inline">
+                                    <label class="layui-form-label">BugExcel</label>
+                                </div>
+                                <div class="layui-inline">
+                                    <input type="file" name="file" id="files" style="width: 400px; height: 25px">
+                                </div>
+                            </div>
+
+                            <div class="layui-form-item">
+                                <div class="layui-inline">
+                                    <label class="layui-form-label">归属项目</label>
+                                    <div class="layui-input-inline">
+                                        <select class="layui-select" id="program_select" name="quiz1" lay-filter="chufaversion" >
+                                            <option value="">请选择项目</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="layui-inline">
+                                    <label class="layui-form-label">线上/线下</label>
+                                    <div class="layui-input-inline">
+                                        <select  id="offon_select" name="modules" lay-verify="required" lay-search="">
+                                            <option value="">直接选择或搜索选择</option>
+                                            <option value="offline">线下</option>
+                                            <option value="online">线上</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <div class="layui-inline">
+                                    <label class="layui-form-label">迭代版本</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" name="iteration" id="iteration" lay-verify="required" lay-reqtext="迭代版本号必填项，岂能为空？" autocomplete="off" placeholder="请输入"  class="layui-input" style="width:400px">
+                                    </div>
+                                </div>
+                                <div class="layui-inline">
+                                    <select class="layui-select" id="version_select" lay-filter="existitera" style="color: darkcyan;margin-left: 10px">
+                                        <option value="">已存在的版本</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="layui-form-item">
+                                <div class="layui-inline">
+                                    <label class="layui-form-label">迭代日期</label>
+                                    <div class="layui-input-inline">
+                                        <input type="date" id="date_s" placeholder="开始日期" class="layui-input">
+                                    </div>
+                                <div class="layui-form-mid">--</div>
+                                <div class="layui-input-inline">
+                                    <input type="date" id="date_e"  placeholder="结束日期" class="layui-input">
+                                </div>
+                                </div>
+                            </div>
+
+                            <div class="layui-form-item layui-form-text">
+                                <label class="layui-form-label">设置备注</label>
+                                <div class="layui-input-block">
+                                    <textarea placeholder="请输入内容" class="layui-textarea" style="width: 600px"></textarea>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <div class="layui-input-block">
+                                    <!--<button type="button" class="layui-btn" id="uploadExcel" ><i class="layui-icon"></i>导入</button>-->
+                                    <button type="button" class="layui-btn" id="uploadExcel" onclick="fileImport();"><i class="layui-icon"></i>导入</button>
+                                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+        </div>
+        {% endif %}
+        {% if perms.Bug.add_detail %}
+        <div class="layui-tab-item">
+                <div class="layui-main">
+                    <div id="LAY_preview">
+                        <form class="layui-form" action="" style="margin-top: 20px;">
+                            <div class="layui-form-item">
+                                <div class="layui-inline">
+                                    <label class="layui-form-label">数据来源</label>
+                                    <div class="layui-input-inline">
+                                        <select  id="source_select3" lay-verify="required" lay-search="">
+                                            <option value="">选择数据来源</option>
+                                            <option value="zentao">禅道</option>
+                                            <option value="jira">Jira</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <div class="layui-inline">
+                                    <label class="layui-form-label">归属项目</label>
+                                    <div class="layui-input-inline">
+                                        <select class="layui-select" id="program_select3" name="quiz3" lay-filter="chufaversion3" >
+                                            <option value="">请选择项目</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <div class="layui-inline">
+                                    <label class="layui-form-label">迭代版本</label>
+                                    <div class="layui-input-inline">
+                                        <select class="layui-select" id="version_select3" name="version3" lay-filter="existitera3">
+                                            <option value="">已存在的版本</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="layui-form-item">
+                                <div class="layui-inline">
+                                    <label class="layui-form-label">迭代日期</label>
+                                    <div class="layui-input-inline">
+                                        <input type="date" id="date_s3" placeholder="开始日期" class="layui-input">
+                                    </div>
+                                <div class="layui-form-mid">--</div>
+                                <div class="layui-input-inline">
+                                    <input type="date" id="date_e3"  placeholder="结束日期" class="layui-input">
+                                </div>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <div class="layui-input-block">
+                                    <button type="button" class="layui-btn" id="uploadRunCases" onclick="apiImportRunCases();"><i class="layui-icon"></i>导入</button>
+                                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+        </div>
+        {% endif %}
+        {% if perms.Bug.change_testdetail and perms.Bug.view_testdetail %}
+        <div class="layui-tab-item">
+                <div class="layui-main">
+                    <div id="LAY_preview">
+                        <form class="layui-form" action="" style="margin-top: 20px;">
+                            <div class="layui-form-item">
+                                <div class="layui-inline">
+                                    <label class="layui-form-label">测试人员</label>
+                                    <div class="layui-input-inline">
+                                        <select class="layui-select" id="tester_select4" name="tester3" lay-filter="chufauser4" >
+                                            <option value="">请选择</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <div class="layui-inline">
+                                    <label class="layui-form-label">漏测缺陷</label>
+                                    <div class="layui-input-inline">
+                                        <input class="layui-input" id="lostbug4" name="lostbug4" placeholder="漏测个数" onkeyup="this.value=this.value.replace(/\D/g,'')" ></input>
+                                    </div>
+                                    <label class="layui-form-label">个</label>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <div class="layui-inline">
+                                    <label class="layui-form-label">测试延期</label>
+                                    <div class="layui-input-inline">
+                                        <input class="layui-input" id="testdelaytime" name="testdelaytime" placeholder="测试完成延期时间" onkeyup="this.value=this.value.replace(/\D/g,'')" ></input>
+                                    </div>
+                                    <label class="layui-form-label">小时</label>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <div class="layui-inline">
+                                    <label class="layui-form-label">自动化率</label>
+                                    <div class="layui-input-inline">
+                                        <input class="layui-input" id="autofinish" name="autofinish" placeholder="自动化达成率" onkeyup="this.value=this.value.replace(/\D/g,'')" ></input>
+                                    </div>
+                                    <label class="layui-form-label">%</label>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <div class="layui-inline">
+                                    <label class="layui-form-label">归属项目</label>
+                                    <div class="layui-input-inline">
+                                        <select class="layui-select" id="program_select4" name="quiz4" lay-filter="chufaversion4" >
+                                            <option value="">请选择项目</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <div class="layui-inline">
+                                    <label class="layui-form-label">迭代版本</label>
+                                    <div class="layui-input-inline">
+                                        <select class="layui-select" id="version_select4" name="version4" lay-filter="existitera4">
+                                            <option value="">已存在的版本</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <div class="layui-inline">
+                                    <label class="layui-form-label">迭代日期</label>
+                                    <div class="layui-input-inline">
+                                        <input type="date" id="date_s4" placeholder="开始日期" class="layui-input">
+                                    </div>
+                                <div class="layui-form-mid">--</div>
+                                <div class="layui-input-inline">
+                                    <input type="date" id="date_e4"  placeholder="结束日期" class="layui-input">
+                                </div>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <div class="layui-input-block">
+                                    <button type="button" class="layui-btn" id="updateTester" onclick="updateTesterInfo();"><i class="layui-icon"></i>导入</button>
+                                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+        </div>
+        {% endif %}
+        {% if perms.Bug.change_developdetail and perms.Bug.view_developdetail %}
+        <div class="layui-tab-item {{import_v2_title_show2}}">
+                <div class="layui-main">
+                    <div id="LAY_preview">
+                        <form class="layui-form" action="" style="margin-top: 20px;">
+                            <div class="layui-form-item">
+                                <div class="layui-inline">
+                                    <label class="layui-form-label">开发人员</label>
+                                    <div class="layui-input-inline">
+                                        <select class="layui-select" id="developer_select5" name="developer5" lay-filter="chufauser5" >
+                                            <option value="">请选择</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <div class="layui-inline">
+                                    <label class="layui-form-label">提测延期</label>
+                                    <div class="layui-input-inline">
+                                        <input class="layui-input" id="delaytime" name="delaytime" placeholder="提测延期时间" onkeyup="this.value=this.value.replace(/\D/g,'')" ></input>
+                                    </div>
+                                    <label class="layui-form-label">小时</label>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <div class="layui-inline">
+                                    <label class="layui-form-label">冒烟失败</label>
+                                    <div class="layui-input-inline">
+                                        <input class="layui-input" id="smokefailed" name="smokefailed" placeholder="冒烟失败次数" onkeyup="this.value=this.value.replace(/\D/g,'')" ></input>
+                                    </div>
+                                    <label class="layui-form-label">次</label>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <div class="layui-inline" style="display:table-cell;text-align:center">
+                                    <label class="layui-form-label">缺陷reopen</label>
+                                    <div class="layui-input-inline">
+                                        <input class="layui-input" id="bugreopen" name="bugreopen" placeholder="缺陷reopen次数" onkeyup="this.value=this.value.replace(/\D/g,'')" ></input>
+                                    </div>
+                                    <label class="layui-form-label">次</label>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <div class="layui-inline">
+                                    <label class="layui-form-label">归属项目</label>
+                                    <div class="layui-input-inline">
+                                        <select class="layui-select" id="program_select5" name="quiz5" lay-filter="chufaversion5" >
+                                            <option value="">请选择项目</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <div class="layui-inline">
+                                    <label class="layui-form-label">迭代版本</label>
+                                    <div class="layui-input-inline">
+                                        <select class="layui-select" id="version_select5" name="version5" lay-filter="existitera5">
+                                            <option value="">已存在的版本</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <div class="layui-inline">
+                                    <label class="layui-form-label">迭代日期</label>
+                                    <div class="layui-input-inline">
+                                        <input type="date" id="date_s5" placeholder="开始日期" class="layui-input">
+                                    </div>
+                                <div class="layui-form-mid">--</div>
+                                <div class="layui-input-inline">
+                                    <input type="date" id="date_e5"  placeholder="结束日期" class="layui-input">
+                                </div>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <div class="layui-input-block">
+                                    <button type="button" class="layui-btn" id="updateDeveloper" onclick="updateDeveloperInfo();"><i class="layui-icon"></i>导入</button>
+                                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+        </div>
+        {% endif %}
+{#        {% if perms.Bug.add_testdetail and perms.Bug.add_developdetail and perms.Bug.delete_testdetail and perms.Bug.delete_developdetail %}#}
+{#        <div class="layui-tab-item {{import_v2_title_show3}}">#}
+{#                <div class="layui-main">#}
+{#                    <div id="LAY_preview">#}
+{#                        <form class="layui-form" action="" style="margin-top: 20px;">#}
+{#                            <div class="layui-form-item">#}
+{#                                <div class="layui-inline">#}
+{#                                    <label class="layui-form-label">项目人员</label>#}
+{#                                    <div class="layui-input-inline">#}
+{#                                        <select class="layui-select" id="programer_select6" name="programer6" lay-filter="chufauser6" >#}
+{#                                            <option value="">请选择</option>#}
+{#                                        </select>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                            <div class="layui-form-item">#}
+{#                                <div class="layui-inline">#}
+{#                                    <label class="layui-form-label">归属项目</label>#}
+{#                                    <div class="layui-input-inline">#}
+{#                                        <select class="layui-select" id="program_select6" name="quiz6" lay-filter="chufaversion6" >#}
+{#                                            <option value="">请选择项目</option>#}
+{#                                        </select>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                            <div class="layui-form-item">#}
+{#                                <div class="layui-inline">#}
+{#                                    <label class="layui-form-label">迭代版本</label>#}
+{#                                    <div class="layui-input-inline">#}
+{#                                        <select class="layui-select" id="version_select6" name="version6" lay-filter="existitera6">#}
+{#                                            <option value="">已存在的版本</option>#}
+{#                                        </select>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                            <div class="layui-form-item">#}
+{#                                <div class="layui-inline">#}
+{#                                    <label class="layui-form-label">迭代日期</label>#}
+{#                                    <div class="layui-input-inline">#}
+{#                                        <input type="date" id="date_s6" placeholder="开始日期" class="layui-input">#}
+{#                                    </div>#}
+{#                                <div class="layui-form-mid">--</div>#}
+{#                                <div class="layui-input-inline">#}
+{#                                    <input type="date" id="date_e6"  placeholder="结束日期" class="layui-input">#}
+{#                                </div>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                            <div class="layui-form-item">#}
+{#                                <div class="layui-inline">#}
+{#                                    <label class="layui-form-label">评分</label>#}
+{#                                    <div class="layui-input-inline">#}
+{#                                        <input class="layui-input" id="program_scores" name="program_scores" placeholder="0-10分，小数后一位" onkeyup="this.value=this.value.replace(/(\d*\.\d).*/,'$1');" ></input>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                            <div class="layui-form-item layui-form-text">#}
+{#                                <label class="layui-form-label">评分说明</label>#}
+{#                                <div class="layui-input-block">#}
+{#                                    <textarea id="Program_Score_Desc" placeholder="请输入内容（选填）" class="layui-textarea" style="width: 600px"></textarea>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                            <div class="layui-form-item">#}
+{#                                <div class="layui-input-block">#}
+{#                                    <button type="button" class="layui-btn" id="updateProgramer" onclick="updateProgramerInfo();"><i class="layui-icon"></i>导入</button>#}
+{#                                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </form>#}
+{#                    </div>#}
+{#                </div>#}
+{#        </div>#}
+{#        {% endif %}#}
+{#        {% if perms.Bug.change_testdetail and perms.Bug.delete_testdetail or perms.Bug.change_developdetail and perms.Bug.delete_developdetail %}#}
+{#        <div class="layui-tab-item">#}
+{#                <div class="layui-main">#}
+{#                    <div id="LAY_preview">#}
+{#                        <form class="layui-form" action="" style="margin-top: 20px;">#}
+{#                            <div class="layui-form-item">#}
+{#                                <div class="layui-inline">#}
+{#                                    <label class="layui-form-label">技术人员</label>#}
+{#                                    <div class="layui-input-inline">#}
+{#                                        <select class="layui-select" id="tech_select7" name="tech7" lay-filter="chufauser7" >#}
+{#                                            <option value="">请选择</option>#}
+{#                                        </select>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                            <div class="layui-form-item">#}
+{#                                <div class="layui-inline">#}
+{#                                    <label class="layui-form-label">归属项目</label>#}
+{#                                    <div class="layui-input-inline">#}
+{#                                        <select class="layui-select" id="program_select7" name="quiz7" lay-filter="chufaversion7" >#}
+{#                                            <option value="">请选择项目</option>#}
+{#                                        </select>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                            <div class="layui-form-item">#}
+{#                                <div class="layui-inline">#}
+{#                                    <label class="layui-form-label">迭代版本</label>#}
+{#                                    <div class="layui-input-inline">#}
+{#                                        <select class="layui-select" id="version_select7" name="version7" lay-filter="existitera7">#}
+{#                                            <option value="">已存在的版本</option>#}
+{#                                        </select>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                            <div class="layui-form-item">#}
+{#                                <div class="layui-inline">#}
+{#                                    <label class="layui-form-label">迭代日期</label>#}
+{#                                    <div class="layui-input-inline">#}
+{#                                        <input type="date" id="date_s7" placeholder="开始日期" class="layui-input">#}
+{#                                    </div>#}
+{#                                <div class="layui-form-mid">--</div>#}
+{#                                <div class="layui-input-inline">#}
+{#                                    <input type="date" id="date_e7"  placeholder="结束日期" class="layui-input">#}
+{#                                </div>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                            <div class="layui-form-item">#}
+{#                                <div class="layui-inline">#}
+{#                                    <label class="layui-form-label">评分</label>#}
+{#                                    <div class="layui-input-inline">#}
+{#                                        <input class="layui-input" id="tech_scores" name="tech_scores" placeholder="0-10分，小数后一位" onkeyup="this.value=this.value.replace(/(\d*\.\d).*/,'$1');" ></input>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                            <div class="layui-form-item layui-form-text">#}
+{#                                <label class="layui-form-label">评分说明</label>#}
+{#                                <div class="layui-input-block">#}
+{#                                    <textarea id="Technology_Score_Desc" placeholder="请输入内容（选填）" class="layui-textarea" style="width: 600px"></textarea>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                            <div class="layui-form-item">#}
+{#                                <div class="layui-input-block">#}
+{#                                    <button type="button" class="layui-btn" id="updateTech" onclick="updateTechInfo();"><i class="layui-icon"></i>导入</button>#}
+{#                                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </form>#}
+{#                    </div>#}
+{#                </div>#}
+{#        </div>#}
+{#        {% endif %}#}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts2 %}
+<script src="/static/js/jquery-1.9.1.js"></script>
+<script src="https://cdn.bootcss.com/xlsx/0.11.5/xlsx.core.min.js"></script>
+<script src="/static/layui.js"></script>
+<!--<script>-->
+    <!--$.ajaxSetup({-->
+        <!--data:{csrfmiddlewaretoken:'{{ csrf_token }}'}-->
+    <!--})-->
+<!--</script>-->
+<script>
+        function tcshowloading(t) {
+            if (t) {
+                console.log(t);
+                loading = layer.load(2,{
+                    shade: [0.5, '#fff']
+                });
+            } else {
+                console.log("关闭loading层:" + t);
+                layer.closeAll('loading');
+            }
+        }
+
+        function initProgramSelect(fileds) {
+          var select_program = document.getElementById("program_select");
+          var select_program2 = document.getElementById("program_select2");
+          var select_program3 = document.getElementById("program_select3");
+          var select_program4 = document.getElementById("program_select4");
+          var select_program5 = document.getElementById("program_select5");
+          var select_program6 = document.getElementById("program_select6");
+          var select_program7 = document.getElementById("program_select7");
+          s_str = '<option value="">请选择项目</option>';
+          if (fileds.length!=0) {
+             try
+             {
+                 var ver_fileds = JSON.parse(fileds);
+             }
+             catch(err)
+             {
+                 var ver_fileds = fileds;
+             }
+
+             for (var key in ver_fileds) {
+                 program_group = key;
+                 s_str += '<optgroup label="'+ program_group +'">'
+                 programs = ver_fileds[key]
+                 programs.forEach(function(program) {
+                    s_str += '<option value="' + program +'">' + program +'</option>'
+                 });
+             };
+          }
+          try {
+              select_program.innerHTML = s_str;
+          }
+          catch (err) {
+          }
+          try {
+              select_program2.innerHTML = s_str;
+          }
+          catch (err) {
+          }
+          try {
+              select_program3.innerHTML = s_str;
+          }
+          catch (err) {
+          }
+          try {
+              select_program4.innerHTML = s_str;
+          }
+          catch (err) {
+          }
+          try {
+              select_program5.innerHTML = s_str;
+          }
+          catch (err) {
+          }
+          try {
+              select_program6.innerHTML = s_str;
+          }
+          catch (err) {
+          }
+          try {
+              select_program7.innerHTML = s_str;
+          }
+          catch (err) {
+          }
+        }
+        // 初始化项目卡
+        try {
+            initProgramSelect('{{ programs |safe }}');
+        }
+        catch (err) {}
+
+        // 初始化测试人员
+        function initTesterSelect(fileds) {
+            var user_select = document.getElementById("tester_select4");
+            s_str = '<option value="">请选择</option>';
+            if (fileds.length!=0) {
+                try
+                {
+                    var user_fields = JSON.parse(fileds);
+                }
+                catch(err)
+                {
+                    var user_fields = fileds;
+                }
+
+                user_fields.forEach(function(user) {
+                    s_str += '<option value="' +user +'">' +user +'</option>'
+                });
+            }
+            user_select.innerHTML = s_str;
+        }
+        // 初始化项目卡
+        try {
+            initTesterSelect('{{ users |safe }}');
+        }
+        catch (err) {}
+
+        // 初始化开发人员
+        function initDeveloperSelect(fileds) {
+            var duser_select = document.getElementById("developer_select5");
+            s_str = '<option value="">请选择</option>';
+            if (fileds.length!=0) {
+                try
+                {
+                    var user_fields = JSON.parse(fileds);
+                }
+                catch(err)
+                {
+                    var user_fields = fileds;
+                }
+
+                user_fields.forEach(function(user) {
+                    s_str += '<option value="' +user +'">' +user +'</option>'
+                });
+            }
+            duser_select.innerHTML = s_str;
+        }
+        // 初始化项目卡
+        try {
+            initDeveloperSelect('{{ dusers |safe }}');
+        }
+        catch (err) {}
+
+        // 初始化项目人员
+        function initProgramerSelect(fileds) {
+            var puser_select = document.getElementById("programer_select6");
+            s_str = '<option value="">请选择</option>';
+            if (fileds.length!=0) {
+                try
+                {
+                    var user_fields = JSON.parse(fileds);
+                }
+                catch(err)
+                {
+                    var user_fields = fileds;
+                }
+
+                user_fields.forEach(function(user) {
+                    s_str += '<option value="' +user +'">' +user +'</option>'
+                });
+            }
+            puser_select.innerHTML = s_str;
+        }
+        // 初始化项目卡
+        try {
+            initProgramerSelect('{{ pusers |safe }}');
+        } catch (err) {}
+
+        // 初始化技术人员
+        function initTechSelect(fileds) {
+            var tuser_select = document.getElementById("tech_select7");
+            s_str = '<option value="">请选择</option>';
+            if (fileds.length!=0) {
+                try
+                {
+                    var user_fields = JSON.parse(fileds);
+                }
+                catch(err)
+                {
+                    var user_fields = fileds;
+                }
+
+                user_fields.forEach(function(user) {
+                    s_str += '<option value="' +user +'">' +user +'</option>'
+                });
+            }
+            tuser_select.innerHTML = s_str;
+        }
+        // 初始化项目卡
+        try {
+            initTechSelect('{{ tusers |safe }}');
+        } catch (err) {}
+
+        layui.use([ 'form'], function () {
+            form = layui.form;
+            form.on('select(chufaversion)', function () {
+                var programname = document.getElementById('program_select').value;
+                 $.ajax({
+                     type: "GET",
+                     url: "/getRootProgramIterations/",
+                     dataType: 'json',
+                     data:{
+                         program: programname
+                     },
+                     success: function (result) {
+                         var select_version = $("#version_select");
+                         select_version.empty();
+                         select_version.append(new Option('已存在的版本',''));
+                         $.each(result.data, function (index, item){
+                             version = item;
+                             select_version.append(new Option(version,version));
+                         });
+                         form.render("select")
+                     }
+                 });
+            });
+            form.on('select(chufaversion2)', function () {
+                var programname = document.getElementById('program_select2').value;
+                 $.ajax({
+                     type: "GET",
+                     url: "/getRootProgramIterations/",
+                     dataType: 'json',
+                     data:{
+                         program: programname
+                     },
+                     success: function (result) {
+                         var select_version2 = $("#version_select2");
+                         select_version2.empty();
+                         select_version2.append(new Option('已存在的版本',''));
+                         $.each(result.data, function (index, item){
+                             version = item;
+                             select_version2.append(new Option(version,version));
+                         });
+                         form.render("select")
+                     }
+                 });
+            });
+            form.on('select(chufaversion3)', function () {
+                var programname = document.getElementById('program_select3').value;
+                 $.ajax({
+                     type: "GET",
+                     url: "/getRootProgramIterations/",
+                     dataType: 'json',
+                     data:{
+                         program: programname
+                     },
+                     success: function (result) {
+                         var select_version3 = $("#version_select3");
+                         select_version3.empty();
+                         select_version3.append(new Option('已存在的版本',''));
+                         $.each(result.data, function (index, item){
+                             version = item;
+                             select_version3.append(new Option(version,version));
+                         });
+                         form.render("select")
+                     }
+                 });
+            });
+            form.on('select(chufaversion4)', function () {
+                var programname = document.getElementById('program_select4').value;
+                 $.ajax({
+                     type: "GET",
+                     url: "/getRootProgramIterations/",
+                     dataType: 'json',
+                     data:{
+                         program: programname
+                     },
+                     success: function (result) {
+                         var select_version4 = $("#version_select4");
+                         select_version4.empty();
+                         select_version4.append(new Option('已存在的版本',''));
+                         $.each(result.data, function (index, item){
+                             version = item;
+                             select_version4.append(new Option(version,version));
+                         });
+                         form.render("select")
+                     }
+                 });
+            });
+            form.on('select(chufaversion5)', function () {
+                var programname = document.getElementById('program_select5').value;
+                 $.ajax({
+                     type: "GET",
+                     url: "/getRootProgramIterations/",
+                     dataType: 'json',
+                     data:{
+                         program: programname
+                     },
+                     success: function (result) {
+                         var select_version5 = $("#version_select5");
+                         select_version5.empty();
+                         select_version5.append(new Option('已存在的版本',''));
+                         $.each(result.data, function (index, item){
+                             version = item;
+                             select_version5.append(new Option(version,version));
+                         });
+                         form.render("select")
+                     }
+                 });
+            });
+            form.on('select(chufaversion6)', function () {
+                var programname = document.getElementById('program_select6').value;
+                 $.ajax({
+                     type: "GET",
+                     url: "/getRootProgramIterations/",
+                     dataType: 'json',
+                     data:{
+                         program: programname
+                     },
+                     success: function (result) {
+                         var select_version6 = $("#version_select6");
+                         select_version6.empty();
+                         select_version6.append(new Option('已存在的版本',''));
+                         $.each(result.data, function (index, item){
+                             version = item;
+                             select_version6.append(new Option(version,version));
+                         });
+                         form.render("select")
+                     }
+                 });
+            });
+            form.on('select(chufaversion7)', function () {
+                var programname = document.getElementById('program_select7').value;
+                 $.ajax({
+                     type: "GET",
+                     url: "/getRootProgramIterations/",
+                     dataType: 'json',
+                     data:{
+                         program: programname
+                     },
+                     success: function (result) {
+                         var select_version7 = $("#version_select7");
+                         select_version7.empty();
+                         select_version7.append(new Option('已存在的版本',''));
+                         $.each(result.data, function (index, item){
+                             version = item;
+                             select_version7.append(new Option(version,version));
+                         });
+                         form.render("select")
+                     }
+                 });
+            });
+            form.on('select(existitera)', function () {
+                var curitera = document.getElementById('version_select').value;
+                $("#iteration").val(curitera);
+                var programname = document.getElementById('program_select').value;
+                 $.ajax({
+                     type: "GET",
+                     url: "/getRootProgramTargetIterationInfo/",
+                     dataType: 'json',
+                     data:{
+                         program: programname,
+                         iteration_name: curitera
+                     },
+                     success: function (result) {
+                         var data = result.data;
+                         var stime = data.start_time;
+                         var etime = data.end_time;
+                         layui.use('laydate', function(){
+                            var laydate = layui.laydate;
+                             laydate.render({
+                                 elem: '#date_s'
+                                ,value: stime //必须遵循format参数设定的格式
+                             });
+                             laydate.render({
+                                 elem: '#date_e'
+                                ,value: etime //必须遵循format参数设定的格式
+                             });
+                         });
+                     }
+                 });
+            });
+            form.on('select(existitera2)', function () {
+                var curitera = document.getElementById('version_select2').value;
+                $("#iteration2").val(curitera);
+                var programname = document.getElementById('program_select2').value;
+                 $.ajax({
+                     type: "GET",
+                     url: "/getRootProgramTargetIterationInfo/",
+                     dataType: 'json',
+                     data:{
+                         program: programname,
+                         iteration_name: curitera
+                     },
+                     success: function (result) {
+                         var data = result.data;
+                         var stime = data.start_time;
+                         var etime = data.end_time;
+                         layui.use('laydate', function(){
+                            var laydate = layui.laydate;
+                             laydate.render({
+                                 elem: '#date_s2'
+                                ,value: stime //必须遵循format参数设定的格式
+                             });
+                             laydate.render({
+                                 elem: '#date_e2'
+                                ,value: etime //必须遵循format参数设定的格式
+                             });
+                         });
+                     }
+                 });
+            });
+            form.on('select(existitera3)', function () {
+                var curitera = document.getElementById('version_select3').value;
+                var programname = document.getElementById('program_select3').value;
+                 $.ajax({
+                     type: "GET",
+                     url: "/getRootProgramTargetIterationInfo/",
+                     dataType: 'json',
+                     data:{
+                         program: programname,
+                         iteration_name: curitera
+                     },
+                     success: function (result) {
+                         var data = result.data;
+                         var stime = data.start_time;
+                         var etime = data.end_time;
+                         layui.use('laydate', function(){
+                            var laydate = layui.laydate;
+                             laydate.render({
+                                 elem: '#date_s3'
+                                ,value: stime //必须遵循format参数设定的格式
+                             });
+                             laydate.render({
+                                 elem: '#date_e3'
+                                ,value: etime //必须遵循format参数设定的格式
+                             });
+                         });
+                     }
+                 });
+            });
+            form.on('select(existitera4)', function () {
+                var curitera = document.getElementById('version_select4').value;
+                var programname = document.getElementById('program_select4').value;
+                 $.ajax({
+                     type: "GET",
+                     url: "/getRootProgramTargetIterationInfo/",
+                     dataType: 'json',
+                     data:{
+                         program: programname,
+                         iteration_name: curitera
+                     },
+                     success: function (result) {
+                         var data = result.data;
+                         var stime = data.start_time;
+                         var etime = data.end_time;
+                         layui.use('laydate', function(){
+                            var laydate = layui.laydate;
+                             laydate.render({
+                                 elem: '#date_s4'
+                                ,value: stime //必须遵循format参数设定的格式
+                             });
+                             laydate.render({
+                                 elem: '#date_e4'
+                                ,value: etime //必须遵循format参数设定的格式
+                             });
+                         });
+                     }
+                 });
+            });
+            form.on('select(existitera5)', function () {
+                var curitera = document.getElementById('version_select5').value;
+                var programname = document.getElementById('program_select5').value;
+                 $.ajax({
+                     type: "GET",
+                     url: "/getRootProgramTargetIterationInfo/",
+                     dataType: 'json',
+                     data:{
+                         program: programname,
+                         iteration_name: curitera
+                     },
+                     success: function (result) {
+                         var data = result.data;
+                         var stime = data.start_time;
+                         var etime = data.end_time;
+                         layui.use('laydate', function(){
+                            var laydate = layui.laydate;
+                             laydate.render({
+                                 elem: '#date_s5'
+                                ,value: stime //必须遵循format参数设定的格式
+                             });
+                             laydate.render({
+                                 elem: '#date_e5'
+                                ,value: etime //必须遵循format参数设定的格式
+                             });
+                         });
+                     }
+                 });
+            });
+            form.on('select(existitera6)', function () {
+                var curitera = document.getElementById('version_select6').value;
+                var programname = document.getElementById('program_select6').value;
+                 $.ajax({
+                     type: "GET",
+                     url: "/getRootProgramTargetIterationInfo/",
+                     dataType: 'json',
+                     data:{
+                         program: programname,
+                         iteration_name: curitera
+                     },
+                     success: function (result) {
+                         var data = result.data;
+                         var stime = data.start_time;
+                         var etime = data.end_time;
+                         layui.use('laydate', function(){
+                            var laydate = layui.laydate;
+                             laydate.render({
+                                 elem: '#date_s6'
+                                ,value: stime //必须遵循format参数设定的格式
+                             });
+                             laydate.render({
+                                 elem: '#date_e6'
+                                ,value: etime //必须遵循format参数设定的格式
+                             });
+                         });
+                     }
+                 });
+            });
+            form.on('select(existitera7)', function () {
+                var curitera = document.getElementById('version_select7').value;
+                var programname = document.getElementById('program_select7').value;
+                 $.ajax({
+                     type: "GET",
+                     url: "/getRootProgramTargetIterationInfo/",
+                     dataType: 'json',
+                     data:{
+                         program: programname,
+                         iteration_name: curitera
+                     },
+                     success: function (result) {
+                         var data = result.data;
+                         var stime = data.start_time;
+                         var etime = data.end_time;
+                         layui.use('laydate', function(){
+                            var laydate = layui.laydate;
+                             laydate.render({
+                                 elem: '#date_s7'
+                                ,value: stime //必须遵循format参数设定的格式
+                             });
+                             laydate.render({
+                                 elem: '#date_e7'
+                                ,value: etime //必须遵循format参数设定的格式
+                             });
+                         });
+                     }
+                 });
+            });
+        });
+
+        function addbugs(program,iterattion,filecontexts,s_time,e_time,typestr) {
+            // 增加bug数据
+            var splitcount = 50;
+            if (filecontexts == 'zentao' || filecontexts == 'jira') {
+                $.ajax({
+                        type: "POST",
+                        url: "/uploadapi/",
+                        dataType: "html",
+                        data: {
+                            csrfmiddlewaretoken: '{{ csrf_token  }}',
+                            methods: filecontexts,
+                            iteration: iterattion,
+                            s_time: s_time,
+                            e_time: e_time,
+                            program: program,
+                            type: typestr
+                        },
+                        success: function (msg) {
+                            tcshowloading(false);
+                            var msgj = JSON.parse(msg);
+                            if (msgj.code == 0) {
+                                layer.alert("导入成功！");
+                            } else {
+                                layer.alert("导入失败");
+                                console.log(msgj.msg);
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            tcshowloading(false);
+                            layer.alert("导入失败");
+                            console.log(error);
+                        }
+                });
+            } else {
+                var len = filecontexts.length;
+                var loopcount = parseInt(len / splitcount) + 1;
+                console.log("数组长度" + len);
+                console.log("需要循环" + loopcount + "次");
+                requestcount = 0;
+                for (var i = 0; i < loopcount; i++) {
+                    //                var progressBar = document.getElementById('upload_progress');
+                    //                var  interval = window.setInterval("showLoading(500)","1");
+                    files = JSON.stringify(filecontexts.slice(i * splitcount, (i + 1) * splitcount));
+                    //                console.log(files);
+                    $.ajax({
+                        type: "POST",
+                        url: "/uploadexcel/",
+                        dataType: "html",
+                        //                    processData: false,
+                        //    　　            contentType: false,
+                        //                traditional:true,
+                        data: {
+                            csrfmiddlewaretoken: '{{ csrf_token  }}',
+                            filestr: files,
+                            iteration: iterattion,
+                            s_time: s_time,
+                            e_time: e_time,
+                            program: program,
+                            type: typestr
+                        },
+                        success: function (msg) {
+                            //                        console.log(msg);
+                            var msgj = JSON.parse(msg);
+                            if (msgj.code == 0) {
+                                requestcount = requestcount + 1;
+                                //                            console.log("添加成功");
+                                //                            console.log("===========>");
+                                //                            console.log(requestcount);
+                                if (requestcount == loopcount) {
+                                    //                                window.clearInterval(interval);
+                                    layer.alert("导入成功！");
+                                } else if (requestcount != loopcount && i != loopcount - 1) {
+                                    //                                window.clearInterval(interval);
+                                    console.log('go on ...')
+                                } else {
+                                    //                                window.clearInterval(interval);
+                                    layer.alert("导入失败");
+                                }
+                                //                        var questionID = msgj.id;
+                                //                        window.location.href = "/question/" + questionID;  //跳转到详情
+                            } else {
+                                //                            window.clearInterval(interval);
+                                layer.alert("导入失败");
+                                console.log("添加失败");
+                            }
+                            //               $("#display").html(msg);//注意显示的id
+                        },
+                        error: function (xhr, status, error) {
+                            //                        window.clearInterval(interval);
+                            layer.alert("导入失败");
+                            console.log(error);
+                        }
+                    });
+                }
+                tcshowloading(false);
+            }
+        }
+        function add_iteration_and_bugs(program,iterattion,filecontexts,s_time,e_time,typestr) {
+            // 增加迭代版本
+            $.ajax({
+                type: "POST",
+                url: "/addIteration/",
+                dataType: "html",
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token  }}',
+                    program: program,
+                    iteration: iterattion,
+                    s_time: s_time,
+                    e_time: e_time
+                },
+                success: function (msg) {
+//                        console.log(msg);
+                    var msgj = JSON.parse(msg);
+                    if (msgj.code != 0) {
+                        alert("迭代版本添加失败");
+                    } else {
+                        addbugs(program,iterattion,filecontexts,s_time,e_time,typestr)
+                    }
+                    //               $("#display").html(msg);//注意显示的id
+                },
+                error: function (xhr, status, error) {
+                    console.log(error);
+                    tcshowloading(false);
+                    alert("迭代版本添加失败");
+                    return;
+                }
+            });
+        }
+        function add_program_iteration_bugs(program_name,iterattion,filecontexts,s_time,e_time,typestr) {
+            // 增加项目-> 迭代版本-> bug数据
+            $.ajax({
+                type: "POST",
+                url: "/addProgram/",
+                dataType: "html",
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token  }}',
+                    program_name: program_name
+                },
+                success: function (msg) {
+//                        console.log(msg);
+                    var msgj = JSON.parse(msg);
+                    if (msgj.code != 0) {
+                        alert("项目添加失败");
+                    } else {
+                        add_iteration_and_bugs(program_name,iterattion,filecontexts,s_time,e_time,typestr)
+                    }
+                    //               $("#display").html(msg);//注意显示的id
+                },
+                error: function (xhr, status, error) {
+                    tcshowloading(false);
+                    console.log(error);
+                    alert("项目添加失败");
+                }
+            });
+        }
+        function add_runcases_iteration(methods,program_name,iteration,s_time,e_time) {
+            // 增加用例执行数据
+            $.ajax({
+                type: "POST",
+                url: "/addRuncases/",
+                dataType: "html",
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token  }}',
+                    methods: methods,
+                    program: program_name,
+                    iteration: iteration,
+                    s_time: s_time,
+                    e_time: e_time
+                },
+                success: function (msg) {
+                    var msgj = JSON.parse(msg);
+                    if (msgj.code != 0) {
+                        layer.alert("用例执行数据添加失败");
+                    } else {
+{#                        window.clearInterval(interval);#}
+                        tcshowloading(false);
+                        layer.alert("用例执行数据添加成功");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.log(error);
+                    tcshowloading(false);
+                    layer.alert("用例执行数据添加失败");
+                }
+            });
+        }
+        function update_tester_info(program_name,iteration,user,lostcount,testdelaytime,autofinishrate,s_time,e_time) {
+            // 增加用例执行数据
+            $.ajax({
+                type: "POST",
+                url: "/updateTesterInfo/",
+                dataType: "html",
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token  }}',
+                    tester: user,
+                    lostcount: lostcount,
+                    testdelaytime: testdelaytime,
+                    autofinishrate: autofinishrate,
+                    program: program_name,
+                    iteration: iteration,
+                    s_time: s_time,
+                    e_time: e_time
+                },
+                success: function (msg) {
+                    tcshowloading(false);
+                    var msgj = JSON.parse(msg);
+                    if (msgj.code != 0) {
+                        layer.alert("测试人员数据添加失败");
+                    } else {
+                        layer.alert("测试人员数据添加成功");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    tcshowloading(false);
+                    console.log(error);
+                    layer.alert("测试人员数据添加失败");
+                }
+            });
+        }
+        function update_developer_info(program_name,iteration,user,delaytime,smokefailed,reopentimes,s_time,e_time) {
+            // 增加用例执行数据
+            $.ajax({
+                type: "POST",
+                url: "/updateDeveloperInfo/",
+                dataType: "html",
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token  }}',
+                    developer: user,
+                    delaytime: delaytime,
+                    smokefailed: smokefailed,
+                    reopentimes: reopentimes,
+                    program: program_name,
+                    iteration: iteration,
+                    s_time: s_time,
+                    e_time: e_time
+                },
+                success: function (msg) {
+                    tcshowloading(false);
+                    var msgj = JSON.parse(msg);
+                    if (msgj.code != 0) {
+                        layer.alert("开发人员数据添加失败");
+                    } else {
+                        layer.alert("开发人员数据添加成功");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    tcshowloading(false);
+                    console.log(error);
+                    layer.alert("开发人员数据添加失败");
+                }
+            });
+        }
+        function update_ptuser_info(program_name,iteration,user,pscores,tscores,score_desc,s_time,e_time) {
+            // 增加用例执行数据
+            $.ajax({
+                type: "POST",
+                url: "/updateProgramTechScores/",
+                dataType: "html",
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token  }}',
+                    user: user,
+                    pscores: pscores,
+                    tscores: tscores,
+                    scoreDesc: score_desc,
+                    program: program_name,
+                    iteration: iteration,
+                    s_time: s_time,
+                    e_time: e_time
+                },
+                success: function (msg) {
+                    tcshowloading(false);
+                    var msgj = JSON.parse(msg);
+                    if (msgj.code != 0) {
+                        layer.alert("人员数据添加失败");
+                    } else {
+                        layer.alert("人员数据添加成功");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    tcshowloading(false);
+                    console.log(error);
+                    layer.alert("人员数据添加失败");
+                }
+            });
+        }
+        function fileImport() {
+            var filecontexts = window.selectedFile;
+            var iterattion = document.getElementById('iteration').value;
+            var s_time = document.getElementById('date_s').value;
+            var e_time = document.getElementById('date_e').value;
+            var program_name = $('#program_select option:selected').val();
+            var typestr = $('#offon_select option:selected').val();
+            if (filecontexts==null || iterattion==null || s_time==null || e_time==null || program_name==null || typestr==null) {
+                alert("请填写完整字段，所有字段必填！");
+                return;
+            } else {
+                if (filecontexts == '' || iterattion == '' || s_time == '' || e_time == '' || program_name == '' || typestr == '') {
+                    alert("请填写完整字段，所有字段必填！");
+                    return;
+                } else {
+{#                    window.setTimeout("showLoading(3000)","500");#}
+                    tcshowloading(true);
+                    add_program_iteration_bugs(program_name, iterattion, filecontexts, s_time, e_time, typestr)
+                }
+            }
+        }
+        function apiImport() {
+            var methods = document.getElementById('source_select').value;
+            var iterattion = document.getElementById('iteration2').value;
+            var s_time = document.getElementById('date_s2').value;
+            var e_time = document.getElementById('date_e2').value;
+            var program_name = $('#program_select2 option:selected').val();
+            var typestr = 'all'
+            if (methods==null || iterattion==null || s_time==null || e_time==null || program_name==null) {
+                alert("请填写完整字段，所有字段必填！");
+                return;
+            } else {
+                if (methods=='' || iterattion == '' || s_time == '' || e_time == '' || program_name == '' ) {
+                    alert("请填写完整字段，所有字段必填！");
+                    return;
+                } else {
+{#                    window.setTimeout("showLoading(3000)","500");#}
+                    tcshowloading(true);
+                    add_program_iteration_bugs(program_name, iterattion, methods, s_time, e_time, typestr)
+                }
+            }
+        }
+        function apiImportRunCases() {
+            var program_name = $('#program_select3 option:selected').val();
+            var methods = document.getElementById('source_select3').value;
+            var iteration = document.getElementById('version_select3').value;
+            var s_time = document.getElementById('date_s3').value;
+            var e_time = document.getElementById('date_e3').value;
+            if (methods==null || iteration==null || s_time==null || e_time==null || program_name==null) {
+                alert("请填写完整字段，所有字段必填！");
+                return;
+            } else {
+                if (methods=='' || iteration == '' || s_time == '' || e_time == ''|| program_name == '') {
+                    alert("请填写完整字段，所有字段必填！");
+                    return;
+                } else {
+{#                    interval = window.setTimeout("showLoading(5000)","500");#}
+                    tcshowloading(true);
+                    add_runcases_iteration(methods,program_name,iteration, s_time, e_time)
+                }
+            }
+        }
+        function updateTesterInfo() {
+            var program_name = $('#program_select4 option:selected').val();
+            var tester = document.getElementById('tester_select4').value;
+            var lostcount = document.getElementById('lostbug4').value;
+            var testdelaytime = document.getElementById('testdelaytime').value;
+            var autofinishrate = document.getElementById('autofinish').value;
+            var iteration = document.getElementById('version_select4').value;
+            var s_time = document.getElementById('date_s4').value;
+            var e_time = document.getElementById('date_e4').value;
+            if (iteration==null || s_time==null || e_time==null || program_name==null || tester==null) {
+                alert("请填写完整字段，字段必填！");
+                return;
+            } else {
+                if (iteration == '' || s_time == '' || e_time == '' || program_name == '' || tester == '') {
+                    alert("请填写完整字段，字段必填！");
+                    return;
+                } else {
+{#                    window.setTimeout("showLoading(2000)","500");#}
+                    tcshowloading(true);
+                    update_tester_info(program_name,iteration,tester,lostcount,testdelaytime,autofinishrate,s_time,e_time)
+                }
+            }
+        }
+        function updateDeveloperInfo() {
+            var program_name = $('#program_select5 option:selected').val();
+            var tester = document.getElementById('developer_select5').value;
+            var delaytime = document.getElementById('delaytime').value;
+            var smokefailed = document.getElementById('smokefailed').value;
+            var reopentimes = document.getElementById('bugreopen').value;
+            var iteration = document.getElementById('version_select5').value;
+            var s_time = document.getElementById('date_s5').value;
+            var e_time = document.getElementById('date_e5').value;
+            if (iteration==null || s_time==null || e_time==null || program_name==null || tester==null || delaytime==null || smokefailed==null || reopentimes==null) {
+                alert("请填写完整字段，所有字段必填！");
+                return;
+            } else {
+                if (iteration == '' || s_time == '' || e_time == '' || program_name == '' || tester == '' || delaytime==null || smokefailed==null || reopentimes==null) {
+                    alert("请填写完整字段，所有字段必填！");
+                    return;
+                } else {
+                    tcshowloading(true);
+                    update_developer_info(program_name,iteration,tester,delaytime,smokefailed,reopentimes,s_time,e_time)
+                }
+            }
+        }
+        function updateProgramerInfo() {
+            var program_name = $('#program_select6 option:selected').val();
+            var programer = document.getElementById('programer_select6').value;
+            var scores = document.getElementById('program_scores').value;
+            var iteration = document.getElementById('version_select6').value;
+            var score_desc = document.getElementById('Program_Score_Desc').value;
+            var s_time = document.getElementById('date_s6').value;
+            var e_time = document.getElementById('date_e6').value;
+            if (iteration==null || s_time==null || e_time==null || program_name==null || programer==null || scores==null) {
+                alert("请填写完整字段，所有字段必填！");
+                return;
+            } else {
+                if (iteration == '' || s_time == '' || e_time == '' || program_name == '' || programer == '' || scores==null) {
+                    alert("请填写完整字段，所有字段必填！");
+                    return;
+                } else {
+                    tcshowloading(true);
+                    update_ptuser_info(program_name,iteration,programer,scores,null,score_desc,s_time,e_time)
+                }
+            }
+        }
+        function updateTechInfo() {
+            var program_name = $('#program_select7 option:selected').val();
+            var techer = document.getElementById('tech_select7').value;
+            var scores = document.getElementById('tech_scores').value;
+            var score_desc = document.getElementById('Technology_Score_Desc').value;
+            var iteration = document.getElementById('version_select7').value;
+            var s_time = document.getElementById('date_s7').value;
+            var e_time = document.getElementById('date_e7').value;
+            if (iteration==null || s_time==null || e_time==null || program_name==null || techer==null || scores==null) {
+                alert("请填写完整字段，所有字段必填！");
+                return;
+            } else {
+                if (iteration == '' || s_time == '' || e_time == '' || program_name == '' || techer == '' || scores==null) {
+                    alert("请填写完整字段，所有字段必填！");
+                    return;
+                } else {
+                    tcshowloading(true);
+                    update_ptuser_info(program_name,iteration,techer,null,scores,score_desc,s_time,e_time)
+                }
+            }
+        }
+
+        //给input标签绑定change事件，一上传选中的.xls文件就会触发该函数
+        $('#files').change(function(e) {
+        // 加载进度条
+        // 读文件
+        var files = e.target.files;
+        var fileReader = new FileReader();
+        f = files[0];
+//        console.log(f.name);
+        if (f.length <= 0) {
+            alert('请选择文件 .xls .xlsx .csv');
+            return false;
+        } else if (!/\.*\.(xls|xlsx|csv)$/.test(f.name)) {
+            alert('文件上传失败，请检查你的文件格式,仅支持.xls .xlsx .csv');
+            return false;
+        } else if (f.size >= 10485760 ) {
+            alert('文件上传失败，大小不能超过10M');
+            return false;
+        }
+        fileReader.onload = function(ev) {
+            tcshowloading(true);  //加上loading 添加文件时会卡主
+            try {
+                var data = ev.target.result;
+                var workbook = XLSX.read(data, {
+                    type: 'binary'
+                }); // 以二进制流方式读取得到整份excel表格对象
+                var persons = []; // 存储获取到的数据
+            } catch (e) {
+                alert('文件类型不正确');
+                return;
+            }
+            // 表格的表格范围，可用于判断表头是否数量是否正确
+            var fromTo = '';
+            // 遍历每张表读取
+            for (var sheet in workbook.Sheets) {
+                if (workbook.Sheets.hasOwnProperty(sheet)) {
+                    fromTo = workbook.Sheets[sheet]['!ref'];
+//                    console.log(fromTo);
+                    persons = persons.concat(XLSX.utils.sheet_to_json(workbook.Sheets[sheet]));
+                    // break; // 如果只取第一张表，就取消注释这行
+                }
+            }
+            //在控制台打印出来表格中的数据
+//            console.log(persons);
+            //定义数组全局变量，其他函数调用
+            window.selectedFile = persons
+            tcshowloading(false);
+        };
+        // 以二进制方式打开文件
+        var wbk = fileReader.readAsBinaryString(f);
+//        window.excelstr = wbk.data;
+    });
+
+        layui.use('element', function(){
+            var element = layui.element;
+
+            //一些事件触发
+            element.on('tab(tc_demo)', function(data){
+                $("ul#setting > li").removeClass("layui-this");
+                $("ul#setting > li").removeAttr("style","");
+                $(this).attr('style','color: #009688;font-weight: 750;');
+                $(this).addClass('layui-this');
+            });
+        });
+</script>
+
+{% endblock %}

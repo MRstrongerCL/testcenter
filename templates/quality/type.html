@@ -1,0 +1,211 @@
+{% extends "qualityBase.html" %}
+{% load my_tags %}
+{% load static %}
+{% block style %}
+<link rel="stylesheet" href="/static/css/layui.css">
+{% endblock %}
+{% block scripts1 %}
+<script src="/static/layui.js"></script>
+{% for jsfile_name in script_list %}
+<script type="text/javascript" src="{{ host }}/{{ jsfile_name }}.js"></script>
+{% endfor %}
+{% endblock %}
+{% block body1 %}
+<script src="/static/layui.js" charset="utf-8"></script>
+{% endblock %}
+{% block mainbody %}
+        <div class="layui-body">
+          <!-- 内容主体区域 -->
+            <div class="demoTable" style="margin-top: 10px;margin-left: 10px">
+                <b style="color: #009688">选择 项目\线上\线下\迭代：</b>
+                <select class="layui-select" id="program_select" name="quiz" style="color: darkcyan" onchange="changeIteration()">
+                    <option value="">请选择产品</option>
+                </select>
+                <select class="layui-select" id="offon_select" name="modules" lay-verify="required" lay-search="" style="color: darkcyan;margin-left: 10px">
+                    <option value="all">线上/线下</option>
+                    <option value="offline">线下</option>
+                    <option value="online">线上</option>
+                </select>
+                <select class="layui-select" id="version_select" name="modules" lay-verify="required" lay-search="" style="color: darkcyan;margin-left: 10px">
+                    <option value="">迭代版本</option>
+                </select>
+                <button class="layui-btn" data-type="reload" style="margin-left: 10px">更新图表</button>
+            </div>
+            <div style="margin-top: 10px; margin-left: 10px;margin-right: 10px;">
+                <table class="layui-hide" id="bug_types"></table>
+            </div>
+            <div id="pic" style="width: 1200px;height: 400px;margin-top: 5px">{{myechart|safe}}</div>
+        </div>
+{% endblock %}
+
+{% block scripts2 %}
+<script src="/static/js/jquery-1.9.1.js"></script>
+<script type="text/javascript" src="https://assets.pyecharts.org/assets/echarts.min.js"></script>
+<script>
+    function initProgramSelect(fileds) {
+          var select_program = document.getElementById("program_select");
+          s_str = '<option value="">请选择产品</option>';
+          if (fileds.length!=0) {
+             try
+             {
+                 var ver_fileds = JSON.parse(fileds);
+             }
+             catch(err)
+             {
+                 var ver_fileds = fileds;
+             }
+
+             ver_fileds.forEach(function(key)  {
+                 program_group = key;
+                 s_str += '<option value="' + program_group +'">' + program_group +'</option>'
+             });
+          }
+          select_program.innerHTML = s_str;
+    }
+    // 初始化版本选项卡
+    initProgramSelect('{{ programs |safe }}');
+
+    function initVersionSelect(fileds) {
+//         console.log("进入到initVersionSelect");
+         var select_version = document.getElementById("version_select");
+         s_str = '<option value="">迭代版本</option>';
+         if (fileds.length!=0) {
+             try
+             {
+                 var ver_fileds = JSON.parse(fileds);
+             }
+             catch(err)
+             {
+                 var ver_fileds = fileds;
+             }
+
+             ver_fileds.forEach(function(ver) {
+                 version = ver;
+                 s_str += '<option value="' +version +'">' +version +'</option>'
+             });
+         }
+//         console.log(s_str);
+         select_version.innerHTML = s_str;
+    }
+    // 初始化版本选项卡
+    initVersionSelect('{{ versions |safe }}');
+
+    function changeIteration() {
+         var programname = document.getElementById('program_select').value;
+         $.ajax({
+             type: "GET",
+             url: "/getIterations/",
+             dataType: 'json',
+             data:{
+                 program: programname
+             },
+             success: function (result) {
+//                 console.log(result.data);
+                 initVersionSelect(result.data)
+             }
+         });
+    }
+    function chartUpdate() {
+         pic = document.getElementById('pic');
+         var chart = echarts.init(pic, 'white', {renderer: 'canvas'});
+         var program = document.getElementById('program_select');
+         var offon = document.getElementById('offon_select');
+         var version = document.getElementById('version_select');
+         $.ajax({
+             type: "GET",
+             url: "/type_update/",
+             dataType: 'json',
+             data:{
+                 program: program.value,
+                 offonline: offon.value,
+                 version: version.value
+             },
+             success: function (result) {
+                 if (result.data_length=='0') {
+                     chart.clear();
+                 } else {
+                     chart.setOption(result.data, true);
+                 }
+             }
+         });
+    }
+    layui.use('table', function(){
+        var table = layui.table;
+        var fileds_list = [{field:'type', width:120, title: '类型'}];
+        var versions = JSON.parse('{{ modules_fileds|safe }}');
+        versions.forEach(function(ver_filed) {
+            name = ver_filed[0];
+            title_str = ver_filed[1];
+            whole = {field: name, width:120, title: title_str, minWidth: 50, sort: true};
+            fileds_list.push(whole);
+        });
+        table.render({
+            elem: '#bug_types'
+            ,url:'/query_bugs_type/'
+            ,cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+            ,cols: [fileds_list]
+            ,id: 'tableReload'
+            ,where: {
+                offonline: 'offline',
+                program: '东语',
+                version: ''
+            }
+        });
+
+        var $ = layui.$, active = {
+            reload: function(){
+                var program = $('#program_select');
+                var offonline = $('#offon_select');
+                var version = $('#version_select');
+                program = program.val();
+                offonline = offonline.val();
+                version = version.val();
+                $.ajax({
+                     type: "GET",
+                     url: "/query_bugs_type/",
+                     dataType: 'json',
+                     data:{
+                         program: program,
+                         offonline: offonline,
+                         version: version
+                     },
+                     success: function (result) {
+                         versions = result.versions;
+                         datas = result.data;
+                         var table = layui.table;
+                         var fileds_list = [{field:'type', width:120, title: '类型'}];
+                         versions.forEach(function(ver_filed) {
+                            name = ver_filed[0];
+                            title_str = ver_filed[1];
+                            whole = {field: name, width:120, title: title_str, minWidth: 50, sort: true};
+                            fileds_list.push(whole);
+                         });
+                         table.render({
+                            elem: '#bug_types'
+                            , cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+                            , cols: [fileds_list]
+                            , id: 'tableReload'
+                            ,data:datas
+                         });
+                     }
+                 });
+//                //执行重载
+//                table.reload('tableReload', {
+//                    where: {
+//                        program: program.val(),
+//                        offonline: offonline.val(),
+//                        limit: limit.val()
+//                    }
+//                }, 'data');
+            }
+        };
+        $('.demoTable .layui-btn').on('click', function(){
+//              console.log(this);
+              var type = $(this).data('type');
+//              console.log(type);
+              active[type] ? active[type].call(this) : '';
+              chartUpdate();
+        })
+    });
+</script>
+{% endblock %}

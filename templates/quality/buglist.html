@@ -1,0 +1,102 @@
+{% extends "qualityBase.html" %}
+{% load my_tags %}
+{% load static %}
+{% block style %}
+<link rel="stylesheet" href="/static/css/layui.css">
+{% endblock %}
+{% block body1 %}
+  <script src="/static/layui.js" charset="utf-8"></script>
+{% endblock %}
+{% block mainbody %}
+    <div class="layui-body" >
+      <div class="demoTable" style="margin-top: 10px;margin-left: 10px">
+        <b style="color: #009688">搜索 ID\标题\bug类型\功能模块\创建人\迭代\owner\offline\online：</b>
+        <div class="layui-inline">
+          <input class="layui-input" name="id" id="bugReload" autocomplete="off" style="width: 300px">
+        </div>
+        <select class="layui-select" id="program_select" name="quiz" lay-verify="required" lay-search="" style="color: darkcyan">
+            <option value="">请选择产品</option>
+        </select>
+        <button class="layui-btn" data-type="reload">搜索</button>
+      </div>
+
+      <table class="layui-hide" id="LAY_table_bug" lay-filter="user"></table>
+
+      <script>
+          function initProgramSelect(fileds) {
+          var select_program = document.getElementById("program_select");
+          s_str = '<option value="">请选择产品</option>';
+          if (fileds.length!=0) {
+             try
+             {
+                 var ver_fileds = JSON.parse(fileds);
+             }
+             catch(err)
+             {
+                 var ver_fileds = fileds;
+             }
+             ver_fileds.forEach(function(key)  {
+                 program_group = key;
+                 s_str += '<option value="' + program_group +'">' + program_group +'</option>'
+             });
+          }
+          select_program.innerHTML = s_str;
+        }
+        // 初始化版本选项卡
+        initProgramSelect('{{ programs |safe }}');
+
+        layui.use('table', function(){
+          var table = layui.table;
+
+          //方法级渲染
+          table.render({
+              elem: '#LAY_table_bug'
+              ,url: '/query_bugs'
+              ,cols: [[
+                {checkbox: true, fixed: true}
+                ,{field:'id', title: 'ID', width:80, sort: true, fixed: true}
+                ,{field:'title', title: '标题'}
+                ,{field:'status', title: '状态', width:100, sort: true}
+                ,{field:'bug_type', title: '缺陷类型', width:100}
+                ,{field:'bug_moudle', title: '功能模块', sort: true, width:100}
+                ,{field:'bug_owner', title: '缺陷归属', width:100}
+                ,{field:'bug_creater', title: '创建人', width:100}
+                ,{field:'iteration', title: '迭代', sort: true, width:80}
+              ]]
+              ,id: 'tableReload'
+              ,page: true
+              ,height: 570
+              ,limit: 20
+          });
+
+          var $ = layui.$, active = {
+            reload: function(){
+              var bugReload = $('#bugReload');
+              var program = $('#program_select');
+              //执行重载
+              table.reload('tableReload', {
+                  page: {
+                    curr: 1 //重新从第 1 页开始
+                  }
+                  ,where: {
+                      keywords: bugReload.val(),
+                      program_name:program.val()
+                  }
+              }, 'data');
+            }
+          };
+
+          $('.demoTable .layui-btn').on('click', function(){
+//              console.log(this);
+              var type = $(this).data('type');
+//              console.log(type);
+              active[type] ? active[type].call(this) : '';
+          });
+//          console.log($('.demoTable .layui-btn'))
+        });
+      </script>
+    </div>
+{% endblock %}
+
+{% block scripts2 %}
+{% endblock %}

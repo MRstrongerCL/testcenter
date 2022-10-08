@@ -1,0 +1,200 @@
+{% extends "qualityBase.html" %}
+{% load my_tags %}
+{% load static %}
+{% block style %}
+<meta name="renderer" content="webkit">
+<link rel="stylesheet" href="/static/css/layui.css" media="all">
+<link rel="stylesheet" href="/static/css/Loading.css" media="screen" title="no title" charset="utf-8">
+{% endblock %}
+{% block scripts1 %}
+<script src="/static/layui.js"></script>
+<script src="/static/js/Loading.js" charset="utf-8"></script>
+{% endblock %}
+{% block mainbody %}
+<div class="layui-body layui-tab site-demo site-demo-body" lay-filter="tc_demo" style="margin-left: 10px;">
+    <ul class="layui-tab-title site-demo-title" id="setting">
+        {% if perms.Bug.add_rate %}
+            <li class="{{import_v2_title_class}}" style="{{import_v2_title_style}}">设置综合评分系数</li>
+        {% endif %}
+        {% if perms.Bug.view_detail %}
+            <li class="{{import_v2_title_class2}}" style="{{import_v2_title_style2}}">其他</li>
+        {% endif %}
+    </ul>
+    <div class="layui-tab-content">
+        {% if perms.Bug.add_rate %}
+            <div class="layui-tab-item {{import_v2_title_show}}">
+                    <div class="layui-main">
+                        <div id="LAY_preview">
+                            <form class="layui-form" action="" style="margin-top: 20px;">
+                                <div class="layui-form-item">
+                                    <div class="layui-inline">
+                                        <label class="layui-form-label">设置系数</label>
+                                        <div class="layui-input-inline">
+                                            <input class="layui-input" id="totalScoreRate" name="totalScoreRate" placeholder="整数(默认10)" onkeyup="this.value=this.value.replace(/\D/g,'')" ></input>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <div class="layui-input-block">
+                                        <button type="button" class="layui-btn" id="setrate1" onclick="setTotalRate();"><i class="layui-icon"></i>确定</button>
+                                        <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+            </div>
+        {% endif %}
+        {% if perms.Bug.view_detail %}
+            <div class="layui-tab-item {{import_v2_title_show2}}">
+                <a>暂无其他评分系数设置</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts2 %}
+<script src="/static/js/jquery-1.9.1.js"></script>
+<script src="https://cdn.bootcss.com/xlsx/0.11.5/xlsx.core.min.js"></script>
+<script src="/static/layui.js"></script>
+<script>
+        function tcshowloading(t) {
+            if (t) {
+                console.log(t);
+                loading = layer.load(2,{
+                    shade: [0.5, '#fff']
+                });
+            } else {
+                console.log("关闭loading层:" + t);
+                layer.closeAll('loading');
+            }
+        }
+
+        function update_ptuser_info(program_name,iteration,user,pscores,tscores,score_desc,s_time,e_time) {
+            // 增加用例执行数据
+            $.ajax({
+                type: "POST",
+                url: "/updateProgramTechScores/",
+                dataType: "html",
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token  }}',
+                    user: user,
+                    pscores: pscores,
+                    tscores: tscores,
+                    scoreDesc: score_desc,
+                    program: program_name,
+                    iteration: iteration,
+                    s_time: s_time,
+                    e_time: e_time
+                },
+                success: function (msg) {
+                    tcshowloading(false);
+                    var msgj = JSON.parse(msg);
+                    if (msgj.code != 0) {
+                        layer.alert("人员数据添加失败");
+                    } else {
+                        layer.alert("人员数据添加成功");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    tcshowloading(false);
+                    console.log(error);
+                    layer.alert("人员数据添加失败");
+                }
+            });
+        }
+        function update_rate_info(typestr,numstr) {
+            // 更新设置全局变量
+            $.ajax({
+                type: "POST",
+                url: "/update_Rage/",
+                dataType: "html",
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token  }}',
+                    type: typestr,
+                    num: numstr
+                },
+                success: function (msg) {
+                    tcshowloading(false);
+                    var msgj = JSON.parse(msg);
+                    if (msgj.code != 0) {
+                        layer.alert("全局系数比设置失败");
+                    } else {
+                        layer.alert("全局系数比设置成功");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    tcshowloading(false);
+                    console.log(error);
+                    layer.alert("全局系数比设置失败");
+                }
+            });
+        }
+        function updateProgramerInfo() {
+            var program_name = $('#program_select6 option:selected').val();
+            var programer = document.getElementById('programer_select6').value;
+            var scores = document.getElementById('program_scores').value;
+            var iteration = document.getElementById('version_select6').value;
+            var score_desc = document.getElementById('Program_Score_Desc').value;
+            var s_time = document.getElementById('date_s6').value;
+            var e_time = document.getElementById('date_e6').value;
+            if (iteration==null || s_time==null || e_time==null || program_name==null || programer==null || scores==null) {
+                alert("请填写完整字段，所有字段必填！");
+                return;
+            } else {
+                if (iteration == '' || s_time == '' || e_time == '' || program_name == '' || programer == '' || scores==null) {
+                    alert("请填写完整字段，所有字段必填！");
+                    return;
+                } else {
+                    tcshowloading(true);
+                    update_ptuser_info(program_name,iteration,programer,scores,null,score_desc,s_time,e_time)
+                }
+            }
+        }
+        function updateTechInfo() {
+            var program_name = $('#program_select7 option:selected').val();
+            var techer = document.getElementById('tech_select7').value;
+            var scores = document.getElementById('tech_scores').value;
+            var score_desc = document.getElementById('Technology_Score_Desc').value;
+            var iteration = document.getElementById('version_select7').value;
+            var s_time = document.getElementById('date_s7').value;
+            var e_time = document.getElementById('date_e7').value;
+            if (iteration==null || s_time==null || e_time==null || program_name==null || techer==null || scores==null) {
+                alert("请填写完整字段，所有字段必填！");
+                return;
+            } else {
+                if (iteration == '' || s_time == '' || e_time == '' || program_name == '' || techer == '' || scores==null) {
+                    alert("请填写完整字段，所有字段必填！");
+                    return;
+                } else {
+                    tcshowloading(true);
+                    update_ptuser_info(program_name,iteration,techer,null,scores,score_desc,s_time,e_time)
+                }
+            }
+        }
+        function setTotalRate() {
+            var typestr = "whole"
+            var numstr = document.getElementById('totalScoreRate').value;
+            if (numstr==null && numstr=='') {
+                alert("请填写完整字段，所有字段必填！");
+                return;
+            } else {
+                tcshowloading(true);
+                update_rate_info(typestr,numstr)
+            }
+        }
+
+        layui.use('element', function(){
+            var element = layui.element;
+            //一些事件触发
+            element.on('tab(tc_demo)', function(data){
+                $("ul#setting > li").removeClass("layui-this");
+                $("ul#setting > li").removeAttr("style","");
+                $(this).attr('style','color: #009688;font-weight: 750;');
+                $(this).addClass('layui-this');
+            });
+        });
+</script>
+
+{% endblock %}
