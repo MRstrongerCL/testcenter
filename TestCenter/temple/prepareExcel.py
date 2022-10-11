@@ -218,14 +218,14 @@ def gbk2312(n=1):
 
 def prepare():
     filenames = ['东语-线下.xlsx', '物业-线下.xlsx', '新消费-线下.xlsx', '东语-线上.xlsx', '物业-线上.xlsx', '新消费-线上.xlsx']
-    startid = 1001
+    startid = 1
     evry_count = 100
     fnames = filenames[0:]
     for fname in fnames:
         typestr = 'online' if '线上' in fname else 'offline'  #用于bug标题区分 线上bug还是线下bug
         evry_count = evry_count//4 if '线上' in fname else evry_count # 用于使线上bug少于线下
         pcb = preCandaoBugs(startid, filename=fname, typestr=typestr)
-        pcb.preRows(evry_count, sday='2022-9-10 12:00', eday='2022-9-23 12:00')
+        pcb.preRows(evry_count, sday='2022-9-24 12:00', eday='2022-10-7 12:00')
         pcb.save()
         startid += evry_count
 
